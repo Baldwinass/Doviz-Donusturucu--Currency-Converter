@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>💱 Döviz Dönüştürücü</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h2>💱 Döviz Dönüştürücü</h2>
+
+    <label for="languageSelect">🌐 Dil:</label>
+    <select id="languageSelect">
+      <option value="tr">🇹🇷 Türkçe</option>
+      <option value="en">🇬🇧 English</option>
+    </select>
+
+    <label for="themeSelect">🎨 Tema:</label>
+    <select id="themeSelect">
+      <option value="default">Klasik</option>
+      <option value="fun">Renkli</option>
+      <option value="retro">Retro</option>
+    </select>
+
+    <input type="number" id="amount" placeholder="Miktar" />
+    <select id="from"></select>
+    <select id="to"></select>
+    <button class="convert-btn" onclick="convertCurrency()">Dönüştür</button>
+    <div id="result"></div>
+
+    <div class="toggle-container">
+      <span class="toggle-label">🌞 Aydınlık</span>
+      <label class="switch">
+        <input type="checkbox" id="darkModeToggle" />
+        <span class="slider"></span>
+      </label>
+      <span class="toggle-label">🌙 Karanlık</span>
+    </div>
+
+    <label for="datePicker">📅 Tarih Seç:</label>
+    <input type="date" id="datePicker" />
+    <button class="date-btn" onclick="getRateByDate()">Tarihli Kur</button>
+    <div id="dateResult"></div>
+
+    <strong class="chart-title">📈 Son 7 Günlük Kur:</strong>
+    <canvas id="rateChart"></canvas>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
