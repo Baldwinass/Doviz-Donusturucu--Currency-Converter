@@ -1,9 +1,9 @@
 const fromSelect = document.getElementById('from');
 const toSelect = document.getElementById('to');
 const darkToggle = document.getElementById('darkModeToggle');
-const ctx = document.getElementById('rateChart').getContext('2d');
 const languageSelect = document.getElementById('languageSelect');
 const themeSelect = document.getElementById('themeSelect');
+const ctx = document.getElementById('rateChart').getContext('2d');
 let chart;
 let currentLang = 'tr';
 
@@ -13,46 +13,60 @@ const translations = {
     convert: "Dönüştür",
     darkModeLight: "🌞 Aydınlık",
     darkModeDark: "🌙 Karanlık",
-    dateLabel: "📅 Tarih Seç:",
+    dateLabel: "📅 Tarih:",
     dateButton: "Tarihli Kur",
-    resultError: "Lütfen geçerli bir miktar girin.",
+    resultError: "Lütfen pozitif bir miktar girin.",
     sameCurrency: "Aynı para birimine dönüştürülemez.",
-    chartTitle: "📈 Son 7 Günlük Kur",
-    dateResultError: "Tarih bilgisi alınamadı."
+    chartTitle: "📈 Son 7 Günlük Kur Değişimi",
+    dateResultError: "Tarihli veri alınamadı."
   },
   en: {
     amountPlaceholder: "Amount",
     convert: "Convert",
     darkModeLight: "🌞 Light",
     darkModeDark: "🌙 Dark",
-    dateLabel: "📅 Select Date:",
+    dateLabel: "📅 Date:",
     dateButton: "Get Rate",
-    resultError: "Please enter a valid amount.",
+    resultError: "Please enter a positive amount.",
     sameCurrency: "Cannot convert to the same currency.",
     chartTitle: "📈 Last 7 Days Exchange Rate",
-    dateResultError: "Could not fetch date info."
+    dateResultError: "Could not retrieve dated rate."
   }
 };
 
-// Karanlık mod geçişi
-darkToggle.addEventListener('change', () => {
-  const isDark = darkToggle.checked;
-  document.body.classList.toggle('dark', isDark);
-  localStorage.setItem('dark', isDark);
-});
+// Sayfa yüklendiğinde:
+window.onload = () => {
+  const savedLang = localStorage.getItem("preferredLang") || "tr";
+  const theme = localStorage.getItem("theme") || "default";
+  const isDark = localStorage.getItem("dark") === "true";
+
+  document.body.classList.add(theme);
+  themeSelect.value = theme;
+
+  document.body.classList.toggle("dark", isDark);
+  darkToggle.checked = isDark;
+
+  changeLanguage(savedLang);
+  languageSelect.value = savedLang;
+  currentLang = savedLang;
+
+  loadCurrencies();
+  document.getElementById("datePicker").valueAsDate = new Date();
+  renderFavorites();
+};
 
 // Tema seçimi
-themeSelect.addEventListener('change', (e) => {
+themeSelect.addEventListener("change", (e) => {
   const theme = e.target.value;
-  document.body.classList.remove('default', 'fun', 'retro');
+  document.body.classList.remove("default", "fun", "retro");
   document.body.classList.add(theme);
-  localStorage.setItem('theme', theme);
+  localStorage.setItem("theme", theme);
 });
 
-// Dil değiştirici
-languageSelect.addEventListener('change', (e) => {
+// Dil seçimi
+languageSelect.addEventListener("change", (e) => {
   const lang = e.target.value;
-  localStorage.setItem('preferredLang', lang);
+  localStorage.setItem("preferredLang", lang);
   changeLanguage(lang);
 });
 
@@ -68,40 +82,45 @@ function changeLanguage(lang) {
   document.querySelectorAll(".toggle-label")[1].textContent = t.darkModeDark;
 }
 
+// Karanlık mod
+darkToggle.addEventListener("change", () => {
+  const isDark = darkToggle.checked;
+  document.body.classList.toggle("dark", isDark);
+  localStorage.setItem("dark", isDark);
+});
+
 // Para birimlerini yükle
 async function loadCurrencies() {
   try {
-    const res = await fetch('https://api.frankfurter.app/currencies');
+    const res = await fetch("https://api.frankfurter.app/currencies");
     const data = await res.json();
     for (let code in data) {
-      const opt1 = document.createElement('option');
-      const opt2 = document.createElement('option');
-      opt1.value = opt2.value = code;
-      opt1.text = opt2.text = `${code} - ${data[code]}`;
-      fromSelect.appendChild(opt1);
-      toSelect.appendChild(opt2);
+      const option1 = new Option(`${code} - ${data[code]}`, code);
+      const option2 = new Option(`${code} - ${data[code]}`, code);
+      fromSelect.appendChild(option1);
+      toSelect.appendChild(option2);
     }
-    fromSelect.value = 'USD';
-    toSelect.value = 'TRY';
-  } catch (error) {
-    console.error("Para birimleri yüklenemedi:", error);
+    fromSelect.value = "USD";
+    toSelect.value = "TRY";
+  } catch (err) {
+    console.error("Dövizler yüklenemedi:", err);
   }
 }
 
-// Döviz çevirme
+// Dönüştürme işlemi
 async function convertCurrency() {
-  const amount = parseFloat(document.getElementById('amount').value);
+  const t = translations[currentLang];
+  const amount = parseFloat(document.getElementById("amount").value);
   const from = fromSelect.value;
   const to = toSelect.value;
-  const t = translations[currentLang];
 
   if (isNaN(amount) || amount <= 0) {
-    document.getElementById('result').textContent = t.resultError;
+    document.getElementById("result").textContent = t.resultError;
     return;
   }
 
   if (from === to) {
-    document.getElementById('result').textContent = t.sameCurrency;
+    document.getElementById("result").textContent = t.sameCurrency;
     return;
   }
 
@@ -109,81 +128,113 @@ async function convertCurrency() {
     const res = await fetch(`https://api.frankfurter.app/latest?amount=${amount}&from=${from}&to=${to}`);
     const data = await res.json();
     const rate = data.rates[to];
-    document.getElementById('result').textContent = `${amount} ${from} = ${rate.toFixed(2)} ${to} 💸`;
+    document.getElementById("result").textContent = `${amount} ${from} = ${rate.toFixed(2)} ${to} 💸 (📅 ${data.date})`;
     loadChart(from, to);
-  } catch (error) {
-    document.getElementById('result').textContent = 'Dönüştürme başarısız.';
+  } catch {
+    document.getElementById("result").textContent = "Dönüştürme başarısız.";
   }
 }
 
-// Grafik çizimi
+// Grafik verisi yükle
 async function loadChart(from, to) {
-  const end = new Date().toISOString().split('T')[0];
-  const start = new Date(Date.now() - 7 * 86400000).toISOString().split('T')[0];
+  const end = new Date().toISOString().split("T")[0];
+  const start = new Date(Date.now() - 6 * 86400000).toISOString().split("T")[0];
+
   try {
     const res = await fetch(`https://api.frankfurter.app/${start}..${end}?from=${from}&to=${to}`);
     const data = await res.json();
-    const labels = Object.keys(data.rates);
-    const values = labels.map(date => data.rates[date][to]);
+    const dates = Object.keys(data.rates);
+    const values = dates.map(d => data.rates[d][to]);
 
     if (chart) chart.destroy();
     chart = new Chart(ctx, {
-      type: 'line',
+      type: "line",
       data: {
-        labels: labels,
+        labels: dates,
         datasets: [{
           label: `1 ${from} → ${to}`,
           data: values,
-          borderColor: '#007bff',
-          backgroundColor: 'rgba(0,123,255,0.1)',
+          borderColor: "#0d6efd",
+          backgroundColor: "rgba(13,110,253,0.1)",
           fill: true,
           tension: 0.3
         }]
       },
       options: {
         responsive: true,
-        plugins: {
-          legend: { display: true }
-        }
+        plugins: { legend: { display: true } }
       }
     });
-  } catch (error) {
-    console.error("Grafik verisi yüklenemedi:", error);
+  } catch (err) {
+    console.error("Grafik yükleme hatası:", err);
   }
 }
 
-// Tarihli kur
+// Tarihli kur isteği
 async function getRateByDate() {
-  const date = document.getElementById('datePicker').value;
+  const t = translations[currentLang];
+  const date = document.getElementById("datePicker").value;
   const from = fromSelect.value;
   const to = toSelect.value;
-  const t = translations[currentLang];
+
   if (!date) return;
 
   try {
     const res = await fetch(`https://api.frankfurter.app/${date}?from=${from}&to=${to}`);
     const data = await res.json();
-    document.getElementById('dateResult').textContent = `📅 ${date}: 1 ${from} = ${data.rates[to]} ${to}`;
+    const rate = data.rates[to];
+    document.getElementById("dateResult").textContent = `📅 ${date}: 1 ${from} = ${rate} ${to}`;
   } catch {
-    document.getElementById('dateResult').textContent = t.dateResultError;
+    document.getElementById("dateResult").textContent = t.dateResultError;
   }
 }
 
-// Sayfa ilk yüklendiğinde
-window.onload = () => {
-  const savedLang = localStorage.getItem('preferredLang');
-  if (savedLang) currentLang = savedLang;
+// ⭐ Favori döviz çiftlerini yönet (Tıklayınca siler)
+function saveFavorite() {
+  const from = fromSelect.value;
+  const to = toSelect.value;
+  const pair = `${from}_${to}`;
+  let favs = JSON.parse(localStorage.getItem("favorites") || "[]");
 
-  const savedTheme = localStorage.getItem('theme') || 'default';
-  themeSelect.value = savedTheme;
-  document.body.classList.add(savedTheme);
+  if (!favs.includes(pair)) {
+    favs.push(pair);
+    localStorage.setItem("favorites", JSON.stringify(favs));
+    renderFavorites();
+  }
+}
 
-  const isDark = localStorage.getItem('dark') === 'true';
-  darkToggle.checked = isDark;
-  document.body.classList.toggle('dark', isDark);
+function renderFavorites() {
+  const container = document.getElementById("favoritesList");
+  container.innerHTML = "";
+  const favs = JSON.parse(localStorage.getItem("favorites") || "[]");
 
-  loadCurrencies();
-  changeLanguage(currentLang);
-  languageSelect.value = currentLang;
-  document.getElementById('datePicker').valueAsDate = new Date();
-};
+  favs.forEach(pair => {
+    const [from, to] = pair.split("_");
+    const el = document.createElement("span");
+    el.className = "fav-item";
+    el.textContent = `${from} → ${to}`;
+
+    // Tıklanırsa sil
+    el.onclick = () => {
+      const updated = favs.filter(f => f !== pair);
+      localStorage.setItem("favorites", JSON.stringify(updated));
+      renderFavorites();
+    };
+
+    container.appendChild(el);
+  });
+}
+
+// 🔘 Ripple Efekti
+document.querySelectorAll(".ripple").forEach(btn => {
+  btn.addEventListener("click", function (e) {
+    const ripple = document.createElement("span");
+    ripple.className = "ripple-effect";
+    const rect = this.getBoundingClientRect();
+    ripple.style.left = `${e.clientX - rect.left - 50}px`;
+    ripple.style.top = `${e.clientY - rect.top - 50}px`;
+    ripple.style.width = ripple.style.height = "100px";
+    this.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  });
+});
