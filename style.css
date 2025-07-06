@@ -1,18 +1,20 @@
-/* RESET */
+/* Reset */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
 
+/* Temel Gövde */
 body {
   font-family: 'Segoe UI', sans-serif;
   background-color: #f9fbfc;
   color: #212529;
   padding: 20px;
-  transition: background 0.3s, color 0.3s;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
+/* Başlık */
 header {
   text-align: center;
   margin-bottom: 30px;
@@ -24,6 +26,7 @@ header h1 {
   font-weight: bold;
 }
 
+/* Yerleşim */
 .wrapper {
   display: flex;
   flex-wrap: wrap;
@@ -31,16 +34,26 @@ header h1 {
   justify-content: space-between;
 }
 
-/* Döviz Paneli */
-.converter-panel {
-  flex: 1 1 60%;
+.converter-panel,
+.settings-panel {
   background: #ffffff;
   padding: 24px;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
 }
 
-.converter-panel h2 {
+.converter-panel {
+  flex: 1 1 60%;
+}
+
+.settings-panel {
+  flex: 1 1 35%;
+  min-width: 260px;
+}
+
+/* Panel Başlıkları */
+.converter-panel h2,
+.settings-panel h2 {
   font-size: 22px;
   font-weight: bold;
   margin-bottom: 16px;
@@ -49,6 +62,13 @@ header h1 {
   padding-bottom: 6px;
 }
 
+.chart-section h3 {
+  font-size: 18px;
+  margin-top: 30px;
+  margin-bottom: 10px;
+}
+
+/* Girdi Alanları */
 .input-group,
 .date-group {
   margin-bottom: 20px;
@@ -74,6 +94,7 @@ header h1 {
   flex: 1;
 }
 
+/* Butonlar */
 button {
   padding: 12px 16px;
   background-color: #0d6efd;
@@ -82,45 +103,46 @@ button {
   border-radius: 8px;
   font-size: 16px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 button:hover {
-  background-color: #0849b7;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(13, 110, 253, 0.3);
 }
 
+button:active {
+  transform: scale(0.96);
+}
+
+/* Ripple Efekti */
+.ripple-effect {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  transform: scale(0);
+  animation: ripple 0.6s ease-out forwards;
+  pointer-events: none;
+  z-index: 1;
+}
+
+@keyframes ripple {
+  to {
+    transform: scale(4);
+    opacity: 0;
+  }
+}
+
+/* Sonuç Metni */
 .result-text {
   margin-top: 8px;
   font-weight: bold;
   color: #198754;
 }
 
-.chart-section {
-  margin-top: 30px;
-}
-
-.chart-section h3 {
-  margin-bottom: 10px;
-  font-size: 18px;
-}
-
-/* Site Ayarları */
-.settings-panel {
-  flex: 1 1 35%;
-  background: #ffffff;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  min-width: 260px;
-}
-
-.settings-panel h2 {
-  margin-bottom: 20px;
-  font-size: 20px;
-  color: #495057;
-  font-weight: bold;
-}
-
+/* Ayar Seçiciler */
 .settings-panel label {
   font-weight: 500;
   margin-bottom: 6px;
@@ -136,7 +158,36 @@ button:hover {
   border: 1px solid #ccc;
 }
 
-/* Karanlık-Aydınlık anahtarı */
+/* Favori Dönüşüm Alanı */
+.settings-panel .favorites {
+  margin-top: 20px;
+}
+
+.settings-panel .fav-btn {
+  width: 100%;
+  margin-top: 8px;
+  background-color: #ffc107;
+  color: #000;
+}
+
+.settings-panel .fav-item {
+  display: inline-block;
+  background: #f1f1f1;
+  padding: 6px 12px;
+  border-radius: 20px;
+  margin: 4px 6px 0 0;
+  font-size: 14px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s, color 0.2s;
+}
+
+.settings-panel .fav-item:hover {
+  background: #dc3545;
+  color: white;
+}
+
+/* Karanlık Mod Anahtarı */
 .dark-toggle {
   display: flex;
   align-items: center;
@@ -190,7 +241,7 @@ input:checked + .slider:before {
 }
 
 /* Temalar */
-body.default { background: #f9fbfc; }
+body.default { background-color: #f9fbfc; }
 body.fun { background: linear-gradient(135deg, #ffe0f0, #d7efff); }
 body.retro { background: #f4ecd8; color: #2d1b00; }
 
@@ -205,7 +256,12 @@ body.retro .settings-panel {
   border: 1px solid #ccbfa3;
 }
 
-/* Karanlık Mod */
+body.retro h2,
+body.retro h3 {
+  color: #5c4033;
+}
+
+/* Karanlık Tema */
 body.dark {
   background-color: #121212;
   color: #f1f1f1;
@@ -224,12 +280,17 @@ body.dark button {
   border-color: #444;
 }
 
-body.dark .converter-panel h2 {
+body.dark .converter-panel h2,
+body.dark .settings-panel h2 {
   color: #66b2ff;
   border-color: #444;
 }
 
-/* Mobil uyumluluk */
+body.dark .result-text {
+  color: #00e676;
+}
+
+/* Mobil Uyum */
 @media (max-width: 768px) {
   .wrapper {
     flex-direction: column;
@@ -241,5 +302,16 @@ body.dark .converter-panel h2 {
 
   .settings-panel {
     margin-top: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  header h1 {
+    font-size: 22px;
+  }
+
+  .converter-panel h2,
+  .settings-panel h2 {
+    font-size: 18px;
   }
 }
