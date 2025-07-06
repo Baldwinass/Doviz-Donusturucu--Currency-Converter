@@ -17,19 +17,19 @@
       <h2>💸 Döviz Paneli</h2>
 
       <div class="input-group">
-        <input type="number" id="amount" placeholder="Miktar" />
+        <input type="number" id="amount" placeholder="Miktar" min="1" />
         <div class="currency-selects">
           <select id="from"></select>
           <select id="to"></select>
         </div>
-        <button class="convert-btn" onclick="convertCurrency()">Dönüştür</button>
+        <button class="convert-btn ripple" onclick="convertCurrency()">Dönüştür</button>
         <div id="result" class="result-text"></div>
       </div>
 
       <div class="date-group">
         <label for="datePicker">📅 Tarih:</label>
         <input type="date" id="datePicker" />
-        <button class="date-btn" onclick="getRateByDate()">Tarihli Kur</button>
+        <button class="date-btn ripple" onclick="getRateByDate()">Tarihli Kur</button>
         <div id="dateResult" class="result-text"></div>
       </div>
 
@@ -62,6 +62,12 @@
           <span class="slider"></span>
         </label>
         <span class="toggle-label">🌙</span>
+      </div>
+
+      <div class="favorites">
+        <label for="favoritesList">⭐ Favori Dönüşüm:</label>
+        <div id="favoritesList"></div>
+        <button class="fav-btn ripple" onclick="saveFavorite()">⭐ Favori Kaydet</button>
       </div>
     </aside>
   </main>
